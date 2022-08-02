@@ -247,6 +247,8 @@ init_descriptions()
     units[TIME]="daytime";    descr[TIME]="Time" # synthesized
     units[Tstart]="minutes";  descr[Tstart]="Time since engine start" # synthesized
     units[Checksum]="ignore"; descr[Checksum]="Checksum"  # ignored
+    units[MPPT]="ignore"; descr[MPPT]="MPPT" # 0: OFF; 1: VOLTAGE OR CURRENT LIMITED; 2: MPP TRACKER ACTIVE
+    units[OR]="ignore"; descr[OR]="No clue"  # ignored
 
     # Alarm reason (AR) bits:
     alarm[0]="lowV";     # Low Voltage            # both
@@ -547,10 +549,10 @@ emit_plot_data()
 
     if (( prev_TIME < ( ${plot_data[TIME]} - 1800 ) ))  # 30 minutes have passed
     then
-	printf -v periodic_comment "%b%b" \
-	    "# date, mV, mA, centiW, used mAh, SOC, time-left, degC, alarm\n" \
-	    "# timestamp: $now_date-$now_time\n"
-	prev_TIME=${plot_data[TIME]}
+		printf -v periodic_comment "%b%b" \
+        	"# date, Voltage (mV), Current (mA), Panel Voltage (mV), Panel Power (Watts), Yield total (.01kWh), Yield today (.01kWh), Max power today (.01kWh), Yield yesterday (0.1kWh), Max Power yesterday (Watts), daySequenceNumber,\n" \
+        	"# timestamp: $now_date-$now_time\n"
+		prev_TIME=${plot_data[TIME]}
     else
 	periodic_comment=;
     fi
@@ -559,7 +561,7 @@ emit_plot_data()
 
 	# choose the values we might want to plot
 	comma=;
-	for f in TIME V I Pcalc CE SOC TTG T AR
+	for f in TIME V I VPV PPV H19 H20 H21 H22 H23 HSDS
 	do
 	    if [[ ${plot_data[$f]+isset} ]]
 	    then
